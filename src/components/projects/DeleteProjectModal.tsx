@@ -18,13 +18,12 @@ interface DeleteProjectModalProps {
   project: Project | null;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
 }
 
 
 
 
-export function DeleteProjectModal({ project, isOpen, onClose, onConfirm }: DeleteProjectModalProps) {
+export function DeleteProjectModal({ project, isOpen, onClose }: DeleteProjectModalProps) {
 
 
 
@@ -96,7 +95,6 @@ export function DeleteProjectModal({ project, isOpen, onClose, onConfirm }: Dele
           </AlertDialogCancel>
 
           <AlertDialogAction
-            onClick={onConfirm}
             className="bg-red-600 text-destructive-foreground hover:bg-red-600/90 hover:cursor-pointer active:bg-red-700 transition-colors"
           >
             Delete Project

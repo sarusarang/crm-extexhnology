@@ -1,56 +1,20 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Plus, FolderOpen, Clock, CheckCircle, Server, Globe } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { mockStats } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Search,
-  Eye,
-  Trash2,
-  Plus,
-  FolderOpen,
-  Clock,
-  CheckCircle,
-  Server,
-  Globe
-} from "lucide-react";
-import { mockProjects, mockStats } from "@/lib/mock-data";
-import type { Project } from "../types/project";
-import { EnhancedProjectDetailsModal } from "../components/projects/EnhancedProjectDetailsModal";
-import { DeleteProjectModal } from "@/components/projects/DeleteProjectModal";
 import { AddProjectModal } from "@/components/projects/AddProjectModal";
-import { toast } from "sonner";
+import DateFilter from "@/components/common/DateFilter";
 import StatCard from "@/components/common/StatCard";
+import ProjectTable from "@/components/projects/ProjectTable";
+import { useGetProjects } from "@/services/project/queries";
+import { useAuth } from "@/context/AuthContext";
+import { TableLoader } from "@/components/loaders/TableLoaders";
+import Nodata from "@/components/loaders/Nodata";
+import Error from "@/components/loaders/Error";
 
-
-
-
-
-
-// Function to get the status badge based on project status
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case "completed":
-      return <Badge variant="secondary" className="bg-success/10 text-success border-success/20">Completed</Badge>;
-    case "active":
-      return <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Active</Badge>;
-    case "on-hold":
-      return <Badge variant="secondary" className="bg-warning/10 text-warning border-warning/20">On Hold</Badge>;
-    case "cancelled":
-      return <Badge variant="destructive">Cancelled</Badge>;
-    default:
-      return <Badge variant="outline">{status}</Badge>;
-  }
-};
 
 
 
@@ -58,63 +22,34 @@ const getStatusBadge = (status: string) => {
 export default function ProjectsPage() {
 
 
-  // State management for projects and modals
+
+  // Filter state
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [FilterDate, setFilterDate] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [DomainFilter, setDomainFilter] = useState<string>('all');
+
+
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
 
 
 
   // Modal states
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
 
 
-  // Filter projects based on search term
-  const filteredProjects = mockProjects.filter(project =>
-    project.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
+  // Auth context to get token
+  const { getToken } = useAuth();
 
 
 
 
-  // Handlers for project actions
-  const handleViewProject = (project: Project) => {
-    setSelectedProject(project);
-    setIsDetailsModalOpen(true);
-  };
-
-
-
-  // Handler for deleting a project
-  const handleDeleteProject = (project: Project) => {
-    setProjectToDelete(project);
-    setIsDeleteModalOpen(true);
-  };
-
-
-
-  // Confirm delete action
-  const confirmDelete = () => {
-    // In a real app, this would make an API call
-    console.log("Deleting project:", projectToDelete?.id);
-    toast.success("Project deleted successfully");
-    setIsDeleteModalOpen(false);
-    setProjectToDelete(null);
-  };
-
-
-
-  // Handler for adding a new project
-  const handleAddProject = (data: any) => {
-    // In a real app, this would make an API call
-    console.log("Adding project:", data);
-    toast.success("Project added successfully");
-  };
+  // Fetch projects Data
+  const { data: FilterdProjectData, isLoading, isFetching, isError } = useGetProjects(getToken() ?? "", searchTerm, FilterDate, statusFilter, currentPage);
 
 
 
@@ -123,6 +58,7 @@ export default function ProjectsPage() {
 
 
     <div className="space-y-6 w-full">
+
 
 
       {/* Page Header */}
@@ -210,187 +146,127 @@ export default function ProjectsPage() {
 
 
 
+
       {/* Projects Table */}
       <Card className="card-elevated border border-gray-200 dark:border-blue-500/20 dark:bg-gradient-to-br dark:from-[#0d121e] dark:to-[#101627] shadow-sm">
 
+
         <CardHeader>
 
-          <CardTitle>All Projects</CardTitle>
+
+          <CardTitle>Projects (8)</CardTitle>
 
 
-          <CardDescription>
-            Complete list of projects with key information and actions
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-3">
 
 
-          <div className="flex items-center space-x-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search projects, clients, or emails..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+
+              <div className="flex items-center space-x-2">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search projects, clients, emails , countries..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="sm:w-80 max-w-md"
+                />
+              </div>
+
+            </div>
+
+
+            <div className="flex flex-wrap gap-4">
+
+
+              {/* Date Filter */}
+              <DateFilter FilterDate={FilterDate} setFilterDate={setFilterDate} title="Filter Consultations" />
+
+
+
+              {/* Status Filter */}
+              <Select onValueChange={setStatusFilter} value={statusFilter}>
+
+                <SelectTrigger className="w-40 text-black dark:text-white bg-white/50 dark:bg-gray-800/50 border-gray-300 dark:border-gray-600 backdrop-blur-sm">
+                  <SelectValue placeholder="Filter by Status" />
+                </SelectTrigger>
+
+                <SelectContent className='dark:bg-gray-900'>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Delivered">Delivered</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
+                  <SelectItem value="In Development">In Development</SelectItem>
+                  <SelectItem value="On Hold">On Hold</SelectItem>
+                  <SelectItem value="Cancelled">Cancelled</SelectItem>
+                </SelectContent>
+
+              </Select>
+
+
+              {/* Domain Filter */}
+              <Select onValueChange={setDomainFilter} value={DomainFilter}>
+
+                <SelectTrigger className="w-40 text-black dark:text-white bg-white/50 dark:bg-gray-800/50 border-gray-300 dark:border-gray-600 backdrop-blur-sm">
+                  <SelectValue placeholder="Filter by Status" />
+                </SelectTrigger>
+
+                <SelectContent className='dark:bg-gray-900'>
+                  <SelectItem value="all">All Domains</SelectItem>
+                  <SelectItem value="Expired">Expierd Domains</SelectItem>
+                </SelectContent>
+
+              </Select>
+
+
+            </div>
+
+
           </div>
+
 
         </CardHeader>
 
 
+
+        {/* Table */}
         <CardContent>
 
-
-          <Table>
-
-
-            <TableHeader>
+          {/* Loading UI */}
+          {(isLoading || isFetching) && <TableLoader />}
 
 
-              <TableRow>
-                <TableHead className="w-[60px]">SI No</TableHead>
-                <TableHead>Project Details</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Approach Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-
-            </TableHeader>
+          {/* Error UI */}
+          {isError && <Error />}
 
 
-            <TableBody>
-
-              {filteredProjects.map((project, index) => (
-
-
-                <TableRow key={project.id} className="hover:bg-blue-300/10 transition-colors">
+          {/* No Data UI */}
+          {FilterdProjectData?.length === 0  && (
+            <Nodata />
+          )}
 
 
-                  {/* SI No */}
-                  <TableCell className="font-medium">{index + 1}</TableCell>
-
-
-                  {/* Project Details */}
-                  <TableCell>
-
-                    <div className="flex items-center space-x-3">
-
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={project.clientLogo} alt={project.clientName} />
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {project.clientName.split(" ").map(n => n[0]).join("").substring(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div>
-                        <p className="font-medium">{project.projectName}</p>
-                        <p className="text-sm text-muted-foreground">{project.clientName}</p>
-                      </div>
-
-                    </div>
-
-                  </TableCell>
-
-
-
-                  {/* Contact */}
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{project.phoneNumber}</p>
-                      <p className="text-sm text-muted-foreground">{project.email}</p>
-                    </div>
-                  </TableCell>
-
-
-
-                  {/* Approach Date */}
-                  <TableCell>
-                    {new Date(project.clientApproachDate).toLocaleDateString()}
-                  </TableCell>
-
-
-                  {/* Status */}
-                  <TableCell>
-                    {getStatusBadge(project.status)}
-                  </TableCell>
-
-
-
-                  {/* Actions */}
-                  <TableCell className="text-right">
-
-                    <div className="flex justify-end space-x-2">
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewProject(project)}
-                        className="h-8 w-8 p-0 hover:cursor-pointer hover:bg-blue-500/10 hover:text-blue-500 hover:border-blue-500/20"
-                      >
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">View project</span>
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteProject(project)}
-                        className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 hover:cursor-pointer"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete project</span>
-                      </Button>
-
-                    </div>
-
-                  </TableCell>
-
-
-                </TableRow>
-
-
-              ))}
-
-            </TableBody>
-
-          </Table>
+          {/* Projects Table */}
+          {!isLoading && !isError && FilterdProjectData && FilterdProjectData.length > 0 && (
+            < ProjectTable filteredProjects={FilterdProjectData ?? []} currentPage={currentPage} setPage={setCurrentPage} />
+          )}
 
         </CardContent>
 
+
       </Card>
 
-
-
-      {/* Project Details Modal */}
-      <EnhancedProjectDetailsModal
-        project={selectedProject}
-        isOpen={isDetailsModalOpen}
-        onClose={() => {
-          setIsDetailsModalOpen(false);
-          setSelectedProject(null);
-        }}
-      />
-
-
-      {/* Delete Project Modal */}
-      <DeleteProjectModal
-        project={projectToDelete}
-        isOpen={isDeleteModalOpen}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setProjectToDelete(null);
-        }}
-        onConfirm={confirmDelete}
-      />
 
 
       {/* Add Project Modal */}
       <AddProjectModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSubmit={handleAddProject}
       />
 
 
     </div>
+
+
   );
+
+
 }

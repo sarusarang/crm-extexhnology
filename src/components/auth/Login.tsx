@@ -7,7 +7,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin } from '@/services/auth/mutations';
-import { useAuth } from '@/components/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -81,23 +81,11 @@ export default function Login() {
 
       onSuccess: (response: any) => {
 
-        if (response.status >= 200 && response.status < 300) {
-
-          login(response.data.access);
-          toast.success("Login Success", { description: "You have successfully Logged in", duration: 5000 })
-          form.reset()
-          const from = location.state?.from?.pathname || "/";
-          navigate(from, { replace: true });
-
-        } else {
-
-          if (response?.response?.data.detail) return toast.error("Ops..!", { description: response?.response?.data?.detail, duration: 5000 })
-
-          toast.error("Ops..!", { description: "Something went wrong Please try again.", duration: 5000 })
-
-          console.error(response);
-
-        }
+        login(response.access);
+        toast.success("Login Success", { description: "You have successfully Logged in", duration: 5000 })
+        form.reset()
+        const from = location.state?.from?.pathname || "/";
+        navigate(from, { replace: true });
 
       }
 

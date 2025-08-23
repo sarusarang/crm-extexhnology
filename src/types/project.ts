@@ -1,67 +1,83 @@
+
+
+
+
+
+
+// Worker Interface
+export interface Worker {
+    unique_id: string;
+    worker_name: string;
+    work_role: string;
+    work_status: string;
+    work_started_date: string; // ISO Date string
+    worker_end_date: string;   // ISO Date string
+    assigned_end_date: string; // ISO Date string
+    created_at: string;        // ISO Date string
+    updated_at: string;        // ISO Date string
+    client_project: string;
+}
+
+
+
+
+// Project Interface
 export interface Project {
-    id: string;
-    clientName: string;
-    projectName: string;
+
+    unique_id: string;
+    workers: Worker[];
+    
+    
+    // Client Details
+    client_name: string;
     country: string;
-    phoneNumber: string;
+    phone_number: string;
     email: string;
-    clientLogo?: string;
-    aboutClient: string;
-    clientApproachDate: string;
+    company_sector: string;
+    about: string | null;
+    client_logo: string | null;
+    client_approach_date: string; // Date string
 
-    // Work Assignment
-    natureOfProject: "web" | "mobile" | "software";
-    workType?: string; // Landing Page, Standard Web, e-commerce, etc.
-    workAssignedDate: string;
-    assignedDeliveryDate: string;
 
-    // Domain & Server
-    domainStatus: "active" | "expired" | "pending";
-    domainName: string;
-    domainOwner: "extech" | "client";
-    domainPurchasedFrom: string;
-    domainPurchaseDate: string;
-    domainExpDate: string;
+    // Project Details
+    project_type: string;
+    work_type: string;
+    scope_of_work: string;
+    work_assigned_date: string;
+    work_assigned_delivery_date: string;
+    work_completed_date: string;
+    project_status: string;
 
-    serverStatus: "active" | "expired" | "pending";
-    serverType: string;
-    serverName: string;
-    serverOwner: "extech" | "client";
-    serverAcquiredDate: string;
-    serverExpDate: string;
 
-    // Scope of Work
-    scopeDescription: string;
-    uxuiAssistant: string;
-    workStartDate: string;
-    assignedDeliveryDate2: string;
-    deliveredDate?: string;
+    // Domain Details
+    domain_name: string;
+    domain_provider: string;
+    domain_owned_by: string;
+    domain_purchased_date: string;
+    domain_expiry_date: string;
+    domain_status: string;
 
-    // Development
-    developmentAssignedBy: string;
-    devWorkStartDate: string;
-    devAssignedDeliveryDate: string;
-    devDeliveredDate?: string;
 
-    // Status
-    workStatus: string;
-    statusUpdatedDate: string;
-    workRawDeliveryDate?: string;
-    hostingPublishingDate?: string;
-    lastUpdated?: string;
-    handedOverDate?: string;
-    projectReviewDate?: string;
+    // Server Details
+    server_status: string;
+    server_type: string;
+    server_name: string;
+    server_owned_by: string;
+    server_accrued_date: string;
+    server_expiry_date: string;
 
-    // Metrics
-    totalDaysSpent: number;
-    savedDays: number;
-    overSpendDays: number;
-    spentManpowerCost: number;
 
-    // System fields
-    status: "active" | "completed" | "on-hold" | "cancelled";
-    createdAt: string;
-    updatedAt: string;
+    // Payment Details
+    gateway_used: string;
+    payment_gateway: string;
+    payment_gateway_url: string;
+    payment_gateway_username: string;
+    payment_gateway_password: string;
+
+
+    created_at: string;
+    updated_at: string;
+
 }
 
 export interface ProjectStats {

@@ -4,7 +4,7 @@ import App from './App.tsx'
 import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './components/theme/theme-provider.tsx'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
-import { AuthProvider } from './components/context/AuthContext.tsx'
+import { AuthProvider } from './context/AuthContext.tsx'
 
 
 

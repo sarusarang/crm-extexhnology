@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { Login } from "../AllApi";
+import { toast } from "sonner";
 
 
 
@@ -15,10 +16,16 @@ export const useLogin = () => {
 
         },
 
-        onError: (error) => {
+        onError: (error : any) => {
 
+            if (error?.data?.detail) {
+                return toast.error("Ops..!", {
+                    description: error.data.detail,
+                    duration: 5000
+                });
+            }
+            toast.error("Ops..!", { description: "Something went wrong Please try again.", duration: 5000 })
             console.log("Login Error", error);
-
         }
 
     })

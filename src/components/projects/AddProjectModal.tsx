@@ -31,13 +31,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarIcon, Code, CreditCard, Database, Eye, EyeOff, FolderOpenDot, Plus, Server, Trash2, Upload, User, X } from "lucide-react";
+import { CalendarIcon, Code, CreditCard, Database, Eye, EyeOff, FolderOpenDot, Loader2, Plus, Server, Trash2, Upload, User, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { indianGateways, globalGateways } from "@/lib/mock-data";
 import { motion } from "framer-motion";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { useAddProject } from "@/services/project/mutations";
+import { useAuth } from "../../context/AuthContext";
+
+
+
 
 
 
@@ -48,7 +53,7 @@ const workerSchema = z.object({
     work_role: z.string().nonempty("Work role is required"),
     work_status: z.string().nonempty("Work status is required"),
     work_started_date: z.date().refine((val) => !!val, { message: "Start date is required" }),
-    worker_end_date: z.date().refine((val) => !!val, { message: "End date is required" }),
+    worker_end_date: z.date().nullable(),
     assigned_end_date: z.date().refine((val) => !!val, { message: "Assigned end date is required" }),
 });
 
@@ -72,10 +77,10 @@ const projectSchema = z.object({
         .refine(
             (file) =>
                 file === null ||
-                typeof file === "string" || 
+                typeof file === "string" ||
                 (file instanceof File &&
                     ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(file.type) &&
-                    file.size <= 1.5 * 1024 * 1024), 
+                    file.size <= 1.5 * 1024 * 1024),
             {
                 message: "Logo must be JPEG, PNG, JPG, or WEBP and under 1.5MB",
             }
@@ -142,7 +147,6 @@ type ProjectFormData = z.infer<typeof projectSchema>;
 interface AddProjectModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (data: ProjectFormData) => void;
 }
 
 
@@ -150,7 +154,7 @@ interface AddProjectModalProps {
 
 
 
-export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalProps) {
+export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
 
 
 
@@ -161,22 +165,32 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
 
 
 
+    // Auth Context
+    const { getToken } = useAuth();
+
+
+
+    // Add project mutation
+    const { isPending, mutate: AddProjectMutation } = useAddProject();
+
+
+
 
     // Initialize form with react-hook-form and Zod schema
     const form = useForm<ProjectFormData>({
         resolver: zodResolver(projectSchema),
         mode: "onChange",
         defaultValues: {
-            
+
             client_name: "",
             country: "",
             phone_number: "",
             email: "",
             company_sector: "",
             about: "",
-            client_logo: null,
+            client_logo: "",
             client_approach_date: new Date(),
-            
+
             project_type: "Web Development",
             work_type: "",
             scope_of_work: "",
@@ -184,14 +198,14 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
             work_assigned_delivery_date: new Date(),
             work_completed_date: null,
             project_status: "In Development",
-            
+
             domain_name: "",
             domain_provider: "",
             domain_owned_by: "Own",
             domain_purchased_date: new Date(),
             domain_expiry_date: new Date(),
             domain_status: "Active",
-            
+
             server_status: "Active",
             server_type: "",
             server_name: "",
@@ -211,14 +225,13 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                     work_role: "",
                     work_status: "",
                     work_started_date: new Date(),
-                    worker_end_date: new Date(),
+                    worker_end_date: null,
                     assigned_end_date: new Date(),
                 }
             ]
         }
 
     });
-
 
 
 
@@ -230,16 +243,75 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
     })
 
 
+    
+
+    // Function to format a date as "YYYY-MM-DD"
+    function formatDateOnly(date: Date): string {
+        return date.toISOString().split("T")[0];
+    }
+
 
 
 
     // Handle form submission
     const formsubmit = (data: ProjectFormData) => {
-        onSubmit(data);
-        form.reset();
-        setCurrentStep(1);
-        onClose();
+
+
+        // Create a FormData object
+        const formdata = new FormData();
+
+        formdata.append('client_name', data.client_name);
+        formdata.append('country', data.country);
+        formdata.append('phone_number', data.phone_number);
+        formdata.append('email', data.email);
+        formdata.append('company_sector', data.company_sector);
+        formdata.append('about', data.about);
+        formdata.append('client_logo', data.client_logo);
+        formdata.append('client_approach_date', formatDateOnly(data.client_approach_date));
+
+        formdata.append('project_type', data.project_type);
+        formdata.append('work_type', data.work_type);
+        formdata.append('scope_of_work', data.scope_of_work);
+        formdata.append('work_assigned_date', formatDateOnly(data.work_assigned_date));
+        formdata.append('work_assigned_delivery_date', formatDateOnly(data.work_assigned_delivery_date));
+        formdata.append('work_completed_date', data.work_completed_date ? formatDateOnly(data.work_completed_date) : "");
+        formdata.append('project_status', data.project_status);
+
+        formdata.append('domain_name', data.domain_name);
+        formdata.append('domain_provider', data.domain_provider);
+        formdata.append('domain_owned_by', data.domain_owned_by);
+        formdata.append('domain_purchased_date', formatDateOnly(data.domain_purchased_date));
+        formdata.append('domain_expiry_date', formatDateOnly(data.domain_expiry_date));
+        formdata.append('domain_status', data.domain_status);
+
+        formdata.append('server_status', data.server_status);
+        formdata.append('server_type', data.server_type);
+        formdata.append('server_name', data.server_name);
+        formdata.append('server_owned_by', data.server_owned_by);
+        formdata.append('server_accrued_date', formatDateOnly(data.server_accrued_date));
+        formdata.append('server_expiry_date', formatDateOnly(data.server_expiry_date));
+
+        formdata.append('gateway_used', data.gateway_used);
+        formdata.append('payment_gateway', data.payment_gateway ?? "");
+        formdata.append('payment_gateway_url', data.payment_gateway_url ?? "");
+        formdata.append('payment_gateway_username', data.payment_gateway_username ?? "");
+        formdata.append('payment_gateway_password', data.payment_gateway_password ?? "");
+
+        formdata.append('workers', JSON.stringify(data.workers));
+
+
+        AddProjectMutation({ data: formdata, token: getToken() }, {
+
+            onSuccess: () => {
+                form.reset();
+                setCurrentStep(1);
+                onClose();
+            }
+
+        });
+
     };
+
 
 
 
@@ -717,7 +789,7 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Work Assigned Date</FormLabel>
-                                                    <DatePicker field={field} label="Work Assigned Date" disabled={false} />
+                                                    <DatePicker field={field} label="Work Assigned Date" disabled={true} />
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
@@ -744,7 +816,7 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                                         {/* Project Status */}
                                         <FormField
                                             control={form.control}
-                                            name="work_type"
+                                            name="project_status"
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormLabel>Project Status</FormLabel>
@@ -776,7 +848,7 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                                             name="work_completed_date"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Work Completed Date</FormLabel>
+                                                    <FormLabel>Work Completed Date (Optional)</FormLabel>
                                                     <DatePicker field={field} label="Work Completed Date" disabled={false} />
                                                     <FormMessage />
                                                 </FormItem>
@@ -1431,7 +1503,7 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                                                     name={`workers.${index}.worker_end_date`}
                                                     render={({ field }) => (
                                                         <FormItem>
-                                                            <FormLabel>Work End Date</FormLabel>
+                                                            <FormLabel>Work Ended Date (Optional)</FormLabel>
                                                             <DatePicker field={field} label="End Date" disabled={false} />
                                                             <FormMessage />
                                                         </FormItem>
@@ -1442,8 +1514,8 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
 
                                                 {/* Remove Button */}
                                                 <div className="md:col-span-2 flex justify-end">
-                                                    <Button type="button" className="bg-red-500 text-white font-medium hover:bg-red-700 hover:cursor-pointer" onClick={() => remove(index)}>
-                                                        Remove Worker <Trash2 />
+                                                    <Button disabled={isPending} type="button" className="bg-red-500 text-white font-medium hover:bg-red-700 hover:cursor-pointer" onClick={() => remove(index)}>
+                                                        Remove Developer <Trash2 />
                                                     </Button>
                                                 </div>
 
@@ -1457,6 +1529,7 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                                         <Button
                                             type="button"
                                             className="hover:cursor-pointer "
+                                            disabled={isPending}
                                             onClick={() =>
                                                 append({
                                                     worker_name: "",
@@ -1468,7 +1541,7 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                                                 })
                                             }
                                         >
-                                            Add Worker <Plus />
+                                            Add Developer <Plus />
                                         </Button>
                                     </CardContent>
                                 </Card>
@@ -1483,7 +1556,7 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                             <Button
                                 type="button"
                                 onClick={prevStep}
-                                disabled={currentStep === 1}
+                                disabled={currentStep === 1 || isPending}
                                 className={`flex items-center gap-2 px-5 py-2 font-medium rounded-lg border-2 hover:cursor-pointer transition-all duration-300 ease-in-out ${currentStep === 1 ? "bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600" : "bg-white text-black border-[#6495f7] hover:bg-[#6495f7] hover:text-white shadow-sm hover:shadow-md hover:scale-105 dark:bg-[#6495f7] dark:text-black dark:border-[#6495f7] dark:hover:bg-[#4a7de6] dark:hover:border-[#4a7de6]"} `}
                             >
                                 Previous
@@ -1497,6 +1570,7 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                                 <Button
                                     type="button"
                                     onClick={onClose}
+                                    disabled={isPending}
                                     className="flex items-center hover:cursor-pointer gap-2 px-4 py-2 rounded-lg border border-gray-500/40 text-white bg-[#11161e] hover:bg-[#1a202c] hover:border-gray-400/60 transition-all duration-300 ease-in-out shadow-sm hover:shadow-md"
                                 >
                                     <X className="h-4 w-4" />
@@ -1509,6 +1583,7 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
                                     <Button
                                         type="button"
                                         onClick={nextStep}
+                                        disabled={isPending}
                                         className="flex items-center gap-2 px-5 py-2 hover:cursor-pointer font-medium rounded-lg border-2 bg-white text-black border-[#6495f7] hover:bg-[#6495f7] hover:text-white transition-all duration-300 ease-in-out shadow-sm hover:shadow-md hover:scale-105 dark:bg-[#6495f7] dark:text-black dark:border-[#6495f7]  dark:hover:bg-[#4a7de6] dark:hover:border-[#4a7de6]"
                                     >
                                         Next
@@ -1518,9 +1593,11 @@ export function AddProjectModal({ isOpen, onClose, onSubmit }: AddProjectModalPr
 
                                     <Button
                                         type="submit"
+                                        disabled={isPending}
                                         className="flex items-center gap-2 border-2 font-medium px-4 py-2 rounded-lg hover:cursor-pointer bg-white text-black border-[#6495f7] hover:bg-[#6495f7] hover:text-white  transition-all duration-300 ease-in-out shadow-sm hover:shadow-md hover:scale-105 dark:bg-[#6495f7] dark:text-black dark:border-[#6495f7]  dark:hover:bg-[#4a7de6] dark:hover:border-[#4a7de6]"
                                     >
-                                        <Plus className="h-4 w-4" />
+                                        {isPending ? <Loader2 className="animate-spin duration-100 h-4 w-4" /> : <Plus className="h-4 w-4" />}
+
                                         Create Project
                                     </Button>
 

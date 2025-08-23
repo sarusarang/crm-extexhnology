@@ -159,6 +159,261 @@ export const mockProjects: Project[] = [
     status: "active",
     createdAt: "2024-01-10",
     updatedAt: "2024-02-28"
+  },
+  {
+    id: "PROJ003",
+    clientName: "HealthCare Solutions",
+    projectName: "Patient Management App",
+    country: "United Kingdom",
+    phoneNumber: "+44-20-7946-0958",
+    email: "contact@healthcaresolutions.co.uk",
+    clientLogo: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=64&h=64&fit=crop&crop=center",
+    aboutClient: "Digital healthcare solutions provider",
+    clientApproachDate: "2024-01-10",
+
+    natureOfProject: "mobile",
+    workType: "Mobile App",
+    workAssignedDate: "2024-01-18",
+    assignedDeliveryDate: "2024-05-15",
+
+    domainStatus: "active",
+    domainName: "healthcaresolutions.co.uk",
+    domainOwner: "extech",
+    domainPurchasedFrom: "Cloudflare",
+    domainPurchaseDate: "2024-01-20",
+    domainExpDate: "2025-01-20",
+
+    serverStatus: "active",
+    serverType: "Cloud",
+    serverName: "Google Cloud",
+    serverOwner: "extech",
+    serverAcquiredDate: "2024-01-22",
+    serverExpDate: "2025-01-22",
+
+    scopeDescription: "Mobile app for patient management and appointment scheduling",
+    uxuiAssistant: "Emma Wilson",
+    workStartDate: "2024-01-25",
+    assignedDeliveryDate2: "2024-05-15",
+
+    developmentAssignedBy: "David Brown",
+    devWorkStartDate: "2024-02-05",
+    devAssignedDeliveryDate: "2024-05-01",
+
+    workStatus: "UI/UX design phase - 60% complete",
+    statusUpdatedDate: "2024-02-28",
+
+    totalDaysSpent: 35,
+    savedDays: 10,
+    overSpendDays: 0,
+    spentManpowerCost: 18000,
+
+    status: "active",
+    createdAt: "2024-01-10",
+    updatedAt: "2024-02-28"
+  },
+  {
+    id: "PROJ003",
+    clientName: "HealthCare Solutions",
+    projectName: "Patient Management App",
+    country: "United Kingdom",
+    phoneNumber: "+44-20-7946-0958",
+    email: "contact@healthcaresolutions.co.uk",
+    clientLogo: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=64&h=64&fit=crop&crop=center",
+    aboutClient: "Digital healthcare solutions provider",
+    clientApproachDate: "2024-01-10",
+
+    natureOfProject: "mobile",
+    workType: "Mobile App",
+    workAssignedDate: "2024-01-18",
+    assignedDeliveryDate: "2024-05-15",
+
+    domainStatus: "active",
+    domainName: "healthcaresolutions.co.uk",
+    domainOwner: "extech",
+    domainPurchasedFrom: "Cloudflare",
+    domainPurchaseDate: "2024-01-20",
+    domainExpDate: "2025-01-20",
+
+    serverStatus: "active",
+    serverType: "Cloud",
+    serverName: "Google Cloud",
+    serverOwner: "extech",
+    serverAcquiredDate: "2024-01-22",
+    serverExpDate: "2025-01-22",
+
+    scopeDescription: "Mobile app for patient management and appointment scheduling",
+    uxuiAssistant: "Emma Wilson",
+    workStartDate: "2024-01-25",
+    assignedDeliveryDate2: "2024-05-15",
+
+    developmentAssignedBy: "David Brown",
+    devWorkStartDate: "2024-02-05",
+    devAssignedDeliveryDate: "2024-05-01",
+
+    workStatus: "UI/UX design phase - 60% complete",
+    statusUpdatedDate: "2024-02-28",
+
+    totalDaysSpent: 35,
+    savedDays: 10,
+    overSpendDays: 0,
+    spentManpowerCost: 18000,
+
+    status: "active",
+    createdAt: "2024-01-10",
+    updatedAt: "2024-02-28"
+  },
+  {
+    id: "PROJ003",
+    clientName: "HealthCare Solutions",
+    projectName: "Patient Management App",
+    country: "United Kingdom",
+    phoneNumber: "+44-20-7946-0958",
+    email: "contact@healthcaresolutions.co.uk",
+    clientLogo: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=64&h=64&fit=crop&crop=center",
+    aboutClient: "Digital healthcare solutions provider",
+    clientApproachDate: "2024-01-10",
+
+    natureOfProject: "mobile",
+    workType: "Mobile App",
+    workAssignedDate: "2024-01-18",
+    assignedDeliveryDate: "2024-05-15",
+
+    domainStatus: "active",
+    domainName: "healthcaresolutions.co.uk",
+    domainOwner: "extech",
+    domainPurchasedFrom: "Cloudflare",
+    domainPurchaseDate: "2024-01-20",
+    domainExpDate: "2025-01-20",
+
+    serverStatus: "active",
+    serverType: "Cloud",
+    serverName: "Google Cloud",
+    serverOwner: "extech",
+    serverAcquiredDate: "2024-01-22",
+    serverExpDate: "2025-01-22",
+
+    scopeDescription: "Mobile app for patient management and appointment scheduling",
+    uxuiAssistant: "Emma Wilson",
+    workStartDate: "2024-01-25",
+    assignedDeliveryDate2: "2024-05-15",
+
+    developmentAssignedBy: "David Brown",
+    devWorkStartDate: "2024-02-05",
+    devAssignedDeliveryDate: "2024-05-01",
+
+    workStatus: "UI/UX design phase - 60% complete",
+    statusUpdatedDate: "2024-02-28",
+
+    totalDaysSpent: 35,
+    savedDays: 10,
+    overSpendDays: 0,
+    spentManpowerCost: 18000,
+
+    status: "active",
+    createdAt: "2024-01-10",
+    updatedAt: "2024-02-28"
+  },
+  {
+    id: "PROJ003",
+    clientName: "HealthCare Solutions",
+    projectName: "Patient Management App",
+    country: "United Kingdom",
+    phoneNumber: "+44-20-7946-0958",
+    email: "contact@healthcaresolutions.co.uk",
+    clientLogo: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=64&h=64&fit=crop&crop=center",
+    aboutClient: "Digital healthcare solutions provider",
+    clientApproachDate: "2024-01-10",
+
+    natureOfProject: "mobile",
+    workType: "Mobile App",
+    workAssignedDate: "2024-01-18",
+    assignedDeliveryDate: "2024-05-15",
+
+    domainStatus: "active",
+    domainName: "healthcaresolutions.co.uk",
+    domainOwner: "extech",
+    domainPurchasedFrom: "Cloudflare",
+    domainPurchaseDate: "2024-01-20",
+    domainExpDate: "2025-01-20",
+
+    serverStatus: "active",
+    serverType: "Cloud",
+    serverName: "Google Cloud",
+    serverOwner: "extech",
+    serverAcquiredDate: "2024-01-22",
+    serverExpDate: "2025-01-22",
+
+    scopeDescription: "Mobile app for patient management and appointment scheduling",
+    uxuiAssistant: "Emma Wilson",
+    workStartDate: "2024-01-25",
+    assignedDeliveryDate2: "2024-05-15",
+
+    developmentAssignedBy: "David Brown",
+    devWorkStartDate: "2024-02-05",
+    devAssignedDeliveryDate: "2024-05-01",
+
+    workStatus: "UI/UX design phase - 60% complete",
+    statusUpdatedDate: "2024-02-28",
+
+    totalDaysSpent: 35,
+    savedDays: 10,
+    overSpendDays: 0,
+    spentManpowerCost: 18000,
+
+    status: "active",
+    createdAt: "2024-01-10",
+    updatedAt: "2024-02-28"
+  },
+  {
+    id: "PROJ003",
+    clientName: "HealthCare Solutions",
+    projectName: "Patient Management App",
+    country: "United Kingdom",
+    phoneNumber: "+44-20-7946-0958",
+    email: "contact@healthcaresolutions.co.uk",
+    clientLogo: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=64&h=64&fit=crop&crop=center",
+    aboutClient: "Digital healthcare solutions provider",
+    clientApproachDate: "2024-01-10",
+
+    natureOfProject: "mobile",
+    workType: "Mobile App",
+    workAssignedDate: "2024-01-18",
+    assignedDeliveryDate: "2024-05-15",
+
+    domainStatus: "active",
+    domainName: "healthcaresolutions.co.uk",
+    domainOwner: "extech",
+    domainPurchasedFrom: "Cloudflare",
+    domainPurchaseDate: "2024-01-20",
+    domainExpDate: "2025-01-20",
+
+    serverStatus: "active",
+    serverType: "Cloud",
+    serverName: "Google Cloud",
+    serverOwner: "extech",
+    serverAcquiredDate: "2024-01-22",
+    serverExpDate: "2025-01-22",
+
+    scopeDescription: "Mobile app for patient management and appointment scheduling",
+    uxuiAssistant: "Emma Wilson",
+    workStartDate: "2024-01-25",
+    assignedDeliveryDate2: "2024-05-15",
+
+    developmentAssignedBy: "David Brown",
+    devWorkStartDate: "2024-02-05",
+    devAssignedDeliveryDate: "2024-05-01",
+
+    workStatus: "UI/UX design phase - 60% complete",
+    statusUpdatedDate: "2024-02-28",
+
+    totalDaysSpent: 35,
+    savedDays: 10,
+    overSpendDays: 0,
+    spentManpowerCost: 18000,
+
+    status: "active",
+    createdAt: "2024-01-10",
+    updatedAt: "2024-02-28"
   }
 ];
 

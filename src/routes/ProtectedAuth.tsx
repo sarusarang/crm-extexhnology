@@ -1,4 +1,4 @@
-import { useAuth } from "@/components/context/AuthContext"
+import { useAuth } from "@/context/AuthContext"
 import { useEffect } from "react"
 import { toast } from "sonner"
 import { useLocation, Navigate } from "react-router-dom"

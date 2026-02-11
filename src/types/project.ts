@@ -26,8 +26,8 @@ export interface Project {
 
     unique_id: string;
     workers: Worker[];
-    
-    
+
+
     // Client Details
     client_name: string;
     country: string;
@@ -40,6 +40,7 @@ export interface Project {
 
 
     // Project Details
+    project_name: string;
     project_type: string;
     work_type: string;
     scope_of_work: string;
@@ -80,6 +81,29 @@ export interface Project {
 
 }
 
+
+
+// Links Interface
+export interface Links {
+    next: string | null;
+    previous: string | null;
+}
+
+
+
+// Paginated Response Interface
+export interface PaginatedProjectsResponse {
+    links: Links;
+    count: number;
+    total_pages: number;
+    current_page: number;
+    page_size: number;
+    results: Project[];
+}
+
+
+
+
 export interface ProjectStats {
     totalProjects: number;
     pendingProjects: number;
@@ -87,4 +111,17 @@ export interface ProjectStats {
     expiredDomains: number;
     expiredServers: number;
     onHoldProjects: number;
+}
+
+
+
+
+// Login Response Types
+export type UserType = "superadmin" | "admin" | "developer" ;
+
+export interface AuthTokensResponse {
+    refresh: string;
+    access: string;
+    name: string;
+    user_type: UserType;
 }

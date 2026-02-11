@@ -9,16 +9,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2, Trash2 } from "lucide-react";
+import { useDeleteProject } from "@/services/project/mutations";
+import { useAuth } from "@/context/AuthContext";
+
 
 
 
 // Delete Project props type
 interface DeleteProjectModalProps {
-  project: Project | null;
+  project: Project;
   isOpen: boolean;
   onClose: () => void;
 }
+
 
 
 
@@ -27,7 +31,35 @@ export function DeleteProjectModal({ project, isOpen, onClose }: DeleteProjectMo
 
 
 
+  // Check if project exists
   if (!project) return null;
+
+
+
+  // Get auth context
+  const { getToken } = useAuth();
+
+
+
+  // Mutation hook for deleting a project
+  const { mutate: deleteProject , isPending } = useDeleteProject();
+
+
+
+  // Function to handle project deletion
+  const handleDelete = () => {
+
+    deleteProject({ id: project.unique_id, token: getToken() }, {
+
+      onSuccess: () => {
+
+        onClose();
+
+      }
+
+    });
+
+  }
 
 
 
@@ -67,9 +99,9 @@ export function DeleteProjectModal({ project, isOpen, onClose }: DeleteProjectMo
         <div className="my-4 p-4 bg-muted/50 rounded-lg border border-border/50">
           <p className="text-sm text-muted-foreground mb-2">You are about to delete:</p>
           <div className="space-y-1">
-            <p className="font-semibold">{project.projectName}</p>
-            <p className="text-sm text-muted-foreground">Client: {project.clientName}</p>
-            <p className="text-sm text-muted-foreground">Project ID: {project.id}</p>
+            <p className="font-semibold">{project?.project_name}</p>
+            <p className="text-sm text-muted-foreground">Client: {project?.client_name}</p>
+            <p className="text-sm text-muted-foreground">Project ID: {project.unique_id}</p>
           </div>
         </div>
 
@@ -90,14 +122,16 @@ export function DeleteProjectModal({ project, isOpen, onClose }: DeleteProjectMo
 
         <AlertDialogFooter className="gap-2 pt-4">
 
-          <AlertDialogCancel onClick={onClose} className="hover:cursor-pointer">
+          <AlertDialogCancel onClick={onClose} disabled={isPending} className="hover:cursor-pointer">
             Cancel
           </AlertDialogCancel>
 
           <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isPending}
             className="bg-red-600 text-destructive-foreground hover:bg-red-600/90 hover:cursor-pointer active:bg-red-700 transition-colors"
           >
-            Delete Project
+            Delete Project  {isPending ? <Loader2 className="animate-spin duration-100 h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
           </AlertDialogAction>
 
         </AlertDialogFooter>

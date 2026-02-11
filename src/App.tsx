@@ -5,7 +5,8 @@ import ScrollToTop from "./components/common/ScrollToTop"
 import MainLayout from "./components/layout/MainLayout"
 import AuthLayout from "./components/layout/AuthLayout"
 import SuspenseLoader from "./components/loaders/SuspenseLoader"
-import ProtectedAuth from "./routes/ProtectedAuth"
+import RequireAuth from "@/routes/RequireAuth";
+import RequireRole from "@/routes/RequireRole";
 
 
 
@@ -39,9 +40,9 @@ function App() {
         {/* Main Layout */}
         <Route element={<MainLayout />}>
 
-          <Route path="/" element={<ProtectedAuth ><Overview /> </ProtectedAuth>} />
+          <Route path="/" element={<RequireAuth><RequireRole allowedRoles={["superadmin"]}><Overview /> </RequireRole></RequireAuth>} />
 
-          <Route path="/projects" element={<ProtectedAuth ><Projects /> </ProtectedAuth>} />
+          <Route path="/projects" element={<RequireAuth><RequireRole allowedRoles={["superadmin", "admin"]}><Projects /></RequireRole></RequireAuth>} />
 
         </Route>
 

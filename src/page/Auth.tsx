@@ -71,10 +71,9 @@ const Auth = () => {
               />
             </div>
 
-
             <div className="space-y-2">
-              <CardTitle className="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent animate-fade-in">
-                Admin Portal
+              <CardTitle className="pb-5 text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent animate-fade-in">
+                Project Manager
               </CardTitle>
             </div>
 

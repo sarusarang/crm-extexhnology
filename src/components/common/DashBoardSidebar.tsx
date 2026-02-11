@@ -71,6 +71,7 @@ export function DashBoardSidebar() {
 
         <NavLink
           to={item.url}
+          state={{ from: location }}
           className={cn(
             "flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm transition-all group relative",
             "text-gray-700 dark:text-gray-400 hover:text-blue-500 dark:hover:bg-gray-800",
@@ -160,7 +161,7 @@ export function DashBoardSidebar() {
               isCollapsed && "sr-only"
             )}
           >
-             <Target className="h-3 w-3 inline mr-2" /> Main Navigation
+            <Target className="h-3 w-3 inline mr-2" /> Main Navigation
           </SidebarGroupLabel>
 
 

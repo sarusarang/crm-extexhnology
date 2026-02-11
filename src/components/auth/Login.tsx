@@ -8,8 +8,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin } from '@/services/auth/mutations';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from 'sonner';
-import { useNavigate, useLocation } from 'react-router-dom';
 
 
 
@@ -32,17 +30,6 @@ export default function Login() {
 
   // Auth Context
   const { login } = useAuth();
-
-
-
-  // Navigate
-  const navigate = useNavigate();
-
-
-
-  // Location
-  const location = useLocation();
-
 
 
 
@@ -79,13 +66,10 @@ export default function Login() {
 
     Loginmutation(formdata, {
 
-      onSuccess: (response: any) => {
+      onSuccess: (response) => {
 
-        login(response.access);
-        toast.success("Login Success", { description: "You have successfully Logged in", duration: 5000 })
+        login(response);
         form.reset()
-        const from = location.state?.from?.pathname || "/";
-        navigate(from, { replace: true });
 
       }
 

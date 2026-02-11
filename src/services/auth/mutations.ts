@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { Login } from "../AllApi";
 import { toast } from "sonner";
-
+import type { AuthTokensResponse } from "@/types/project";
 
 
 
@@ -12,7 +12,7 @@ export const useLogin = () => {
 
         mutationFn: async (data: FormData) => {
 
-            return await Login(data);
+            return await Login(data) as AuthTokensResponse;
 
         },
 

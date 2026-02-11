@@ -18,7 +18,6 @@ import Error from "@/components/loaders/Error";
 
 
 
-
 export default function ProjectsPage() {
 
 
@@ -49,7 +48,7 @@ export default function ProjectsPage() {
 
 
   // Fetch projects Data
-  const { data: FilterdProjectData, isLoading, isFetching, isError } = useGetProjects(getToken() ?? "", searchTerm, FilterDate, statusFilter, currentPage);
+  const { data: FilterdProjectData, isLoading, isFetching, isError } = useGetProjects(getToken() ?? "", searchTerm, FilterDate, statusFilter, DomainFilter, currentPage);
 
 
 
@@ -239,15 +238,16 @@ export default function ProjectsPage() {
 
 
           {/* No Data UI */}
-          {FilterdProjectData?.length === 0  && (
+          {FilterdProjectData?.results?.length === 0 && (
             <Nodata />
           )}
 
 
           {/* Projects Table */}
-          {!isLoading && !isError && FilterdProjectData && FilterdProjectData.length > 0 && (
-            < ProjectTable filteredProjects={FilterdProjectData ?? []} currentPage={currentPage} setPage={setCurrentPage} />
+          {!isLoading && !isError && FilterdProjectData && FilterdProjectData?.results?.length > 0 && (
+            < ProjectTable filteredProjects={FilterdProjectData?.results ?? []} currentPage={currentPage} setPage={setCurrentPage} totalPages={FilterdProjectData?.total_pages} />
           )}
+
 
         </CardContent>
 
@@ -261,7 +261,6 @@ export default function ProjectsPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
       />
-
 
     </div>
 

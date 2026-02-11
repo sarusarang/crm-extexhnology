@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, } from "react";
 import { jwtDecode } from "jwt-decode";
 import { toast } from 'sonner';
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import type { AuthTokensResponse, UserType } from "@/types/project";
 
 
 
@@ -16,7 +17,9 @@ interface JwtPayload {
 // Define the AuthContext type  
 interface AuthContextType {
     isAuthenticated: boolean;
-    login: (token: string) => void;
+    userName: string | null;
+    userType: UserType | null;
+    login: (response: AuthTokensResponse) => void;
     logout: () => void;
     getToken: () => string | null;
 }
@@ -70,14 +73,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const navigate = useNavigate();
 
 
+    // Location
+    const location = useLocation();
+
+
     // Login state
     const [isAuthenticated, setIsAuthenticated] = useState(checkAuth());
+    const [userName, setUserName] = useState<string | null>(localStorage.getItem("name"));
+    const [userType, setUserType] = useState<UserType | null>(localStorage.getItem("user_type") as UserType | null);
 
 
 
     // Define the syncAuth function
     const syncAuth = useCallback(() => {
         setIsAuthenticated(checkAuth());
+        setUserName(localStorage.getItem("name"));
+        setUserType(localStorage.getItem("user_type") as UserType | null);
     }, []);
 
 
@@ -105,35 +116,84 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Define the logout function
     const logout = useCallback(() => {
 
+        localStorage.removeItem("token");
+        localStorage.removeItem("name");
+        localStorage.removeItem("user_type");
+
         if (!isAuthenticated) {
-            toast("You are alredy Logged out Click to Login", { action: { label: "Login", onClick: () => navigate("/auth") }, duration: 8000 });
+            toast("You are already logged out. Click to Login", {
+                action: { label: "Login", onClick: () => navigate("/auth") },
+                duration: 8000,
+            });
             return;
         }
 
-        localStorage.removeItem("token");
         setIsAuthenticated(false);
+        setUserName(null);
+        setUserType(null);
+
         window.dispatchEvent(new CustomEvent("authChanged"));
-        toast.success("Logout Success", { description: "You have successfully Logged out", duration: 5000 })
-    }, []);
+        toast.success("Logout Success", {
+            description: "You have successfully logged out",
+            duration: 5000,
+        });
+
+    }, [isAuthenticated, navigate]);
+
 
 
 
 
     // Define the login function
-    const login = useCallback((token: string) => {
+    const login = useCallback((response: AuthTokensResponse) => {
+
         try {
-            const payload: JwtPayload = jwtDecode(token);
+
+            const payload: JwtPayload = jwtDecode(response?.access);
             if (typeof payload.exp !== "number" || payload.exp * 1000 <= Date.now()) {
+                toast.error("Invalid login token. Try again.");
                 throw new Error("Invalid or expired token");
             }
-            localStorage.setItem("token", token);
+
+            // Store in localStorage
+            localStorage.setItem("token", response?.access);
+            localStorage.setItem("name", response?.name);
+            localStorage.setItem("user_type", response?.user_type);
+
+
+            // Update state
             setIsAuthenticated(true);
+            setUserName(response?.name);
+            setUserType(response?.user_type);
+
+
+            // Notify others
             window.dispatchEvent(new CustomEvent("authChanged"));
+
+
+            toast.success("Login Success", { description: `You have successfully Logged in as ${response?.user_type.toUpperCase()}`, duration: 5000 })
+
+
+            // ✅ Role-based redirect
+            let redirectTo = "/";
+            if (response?.user_type === "superadmin") {
+                redirectTo = "/";
+            } else if (response?.user_type === "admin") {
+                redirectTo = "/projects";
+            } else if (response?.user_type === "developer") {
+                redirectTo = "/developer";
+            }
+
+            navigate(redirectTo, { replace: true });
+
         } catch (err) {
+
             console.error("Login failed:", err);
-            toast.error("Invalid login token Try again."); // Optional toast
+            toast.error("Invalid login token. Try again.");
+       
         }
-    }, []);
+    }, [location, navigate]);
+
 
 
 
@@ -172,8 +232,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
 
 
-    const contextValue = useMemo(() => ({ isAuthenticated, login, logout, getToken }),
-        [isAuthenticated, login, logout]
+    const contextValue = useMemo(() => ({ isAuthenticated, userName, userType, login, logout, getToken }),
+        [isAuthenticated, userName, userType, login, logout]
     );
 
 

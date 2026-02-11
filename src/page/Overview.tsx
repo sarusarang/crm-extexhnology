@@ -6,6 +6,7 @@ import StatCard from "@/components/common/StatCard";
 
 
 
+
 // Mock data for charts
 const chartData = [
   { month: "Jan", projects: 12, completed: 8 },

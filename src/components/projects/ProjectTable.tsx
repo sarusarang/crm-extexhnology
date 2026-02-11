@@ -17,12 +17,13 @@ interface ProjectTableProps {
     filteredProjects: Project[];
     currentPage: number;
     setPage: (page: number) => void;
+    totalPages: number;
 }
 
 
 
 
-export default function ProjectTable({ filteredProjects, currentPage, setPage }: ProjectTableProps) {
+export default function ProjectTable({ filteredProjects, currentPage, setPage, totalPages }: ProjectTableProps) {
 
 
 
@@ -91,8 +92,12 @@ export default function ProjectTable({ filteredProjects, currentPage, setPage }:
                         <TableRow key={project?.unique_id} className="hover:bg-blue-300/10 transition-colors">
 
 
+
                             {/* SI No */}
-                            <TableCell className="font-medium">{index + 1}</TableCell>
+                            <TableCell className="font-medium">
+                                {(currentPage - 1) * 10 + (index + 1)}
+                            </TableCell>
+
 
 
                             {/* Project Details */}
@@ -207,9 +212,9 @@ export default function ProjectTable({ filteredProjects, currentPage, setPage }:
                     Previous
                 </Button>
 
-                <span className="text-sm font-medium dark:text-white">Page {currentPage} of {2}</span>
+                <span className="text-sm font-medium dark:text-white">Page {currentPage} of {totalPages}</span>
 
-                <Button variant="outline" size="sm" disabled={currentPage === 2} onClick={() => setPage(currentPage + 1)}>
+                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setPage(currentPage + 1)}>
                     Next
                 </Button>
 

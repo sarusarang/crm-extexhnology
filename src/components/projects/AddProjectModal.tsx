@@ -40,6 +40,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAddProject } from "@/services/project/mutations";
 import { useAuth } from "../../context/AuthContext";
+import { toast } from "sonner";
 
 
 
@@ -86,10 +87,16 @@ const projectSchema = z.object({
             }
         ).optional(),
     client_approach_date: z.date().refine((val) => !!val, { message: "Client approach date is required", }),
+    proposed_project_value: z.number().min(1, "Project value is required"),
+    status_of_payment: z.enum(["Paid", "Unpaid", "Pending"]),
+    pending_amount: z.number().min(1, "Pending amount is required"),
+    payment_received_date: z.date(),
+    payment_received_amount: z.number().min(1, "Payment amount is required"),
 
 
 
     // Project Details
+    project_name: z.string().nonempty("Project name is required"),
     project_type: z.enum(["Web Development", "Mobile Application", "Custom Software", "Web & App"]),
     work_type: z.string().nonempty("Work type is required"),
     scope_of_work: z.string().nonempty("Scope of work is required"),
@@ -107,6 +114,8 @@ const projectSchema = z.object({
     domain_owned_by: z.enum(["Own", "Client"]),
     domain_purchased_date: z.date().refine((val) => !!val, { message: "Domain purchase date is required", }),
     domain_expiry_date: z.date().refine((val) => !!val, { message: "Domain expiry date is required", }),
+    domain_cost: z.number().min(1, "Domain cost is required").optional(),
+    domain_cost_status: z.enum(["Paid", "Unpaid", "Pending"]),
 
 
     server_status: z.enum(["Active", "Expired", "Pending"]),
@@ -115,6 +124,8 @@ const projectSchema = z.object({
     server_owned_by: z.enum(["Own", "Client"]),
     server_accrued_date: z.date().refine((val) => !!val, { message: "Client approach date is required", }),
     server_expiry_date: z.date().refine((val) => !!val, { message: "Client approach date is required", }),
+    server_cost: z.number().min(1, "Server cost is required").optional(),
+    server_cost_status: z.enum(["Paid", "Unpaid", "Pending"]),
 
 
     // Workers Information
@@ -127,7 +138,6 @@ const projectSchema = z.object({
     payment_gateway_url: z.string().optional(),
     payment_gateway_username: z.string().optional(),
     payment_gateway_password: z.string().optional(),
-
 
 });
 
@@ -166,7 +176,7 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
 
 
     // Auth Context
-    const { getToken } = useAuth();
+    const { getToken, userType } = useAuth();
 
 
 
@@ -190,7 +200,14 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
             about: "",
             client_logo: "",
             client_approach_date: new Date(),
+            proposed_project_value: 0,
+            payment_received_amount: 0,
+            payment_received_date: new Date(),
+            pending_amount: 0,
+            status_of_payment: "Pending",
 
+
+            project_name: "",
             project_type: "Web Development",
             work_type: "",
             scope_of_work: "",
@@ -205,6 +222,8 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
             domain_purchased_date: new Date(),
             domain_expiry_date: new Date(),
             domain_status: "Active",
+            domain_cost: 0,
+            domain_cost_status: "Unpaid",
 
             server_status: "Active",
             server_type: "",
@@ -212,6 +231,8 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
             server_owned_by: "Own",
             server_accrued_date: new Date(),
             server_expiry_date: new Date(),
+            server_cost: 0,
+            server_cost_status: "Unpaid",
 
             gateway_used: "No",
             payment_gateway: "",
@@ -243,7 +264,7 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
     })
 
 
-    
+
 
     // Function to format a date as "YYYY-MM-DD"
     function formatDateOnly(date: Date): string {
@@ -269,6 +290,7 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
         formdata.append('client_logo', data.client_logo);
         formdata.append('client_approach_date', formatDateOnly(data.client_approach_date));
 
+        formdata.append('project_name', data.project_name);
         formdata.append('project_type', data.project_type);
         formdata.append('work_type', data.work_type);
         formdata.append('scope_of_work', data.scope_of_work);
@@ -401,6 +423,14 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
 
 
 
+    // Check if user is superadmin
+    if (isOpen && userType !== "superadmin") {
+
+        onClose();
+        return toast.error("Oops..!", { description: `You are not authorized to access this page.`, duration: 5000 });
+
+    }
+
 
 
     return (
@@ -451,6 +481,7 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
                             >
 
 
+                                {/* Client Information */}
                                 <Card className="card-elevated dark:bg-[#0e141d] border-1">
 
 
@@ -664,6 +695,121 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
 
 
 
+                                        {/* Proposed Project Value */}
+                                        <FormField
+                                            control={form.control}
+                                            name="proposed_project_value"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Proposed Project Value</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="Enter proposed project value"
+                                                            value={field.value ? field.value.toLocaleString("en-IN") : ""}
+                                                            onChange={(e) => {
+                                                                const rawValue = e.target.value.replace(/,/g, ""); // remove commas
+                                                                if (!/^\d*$/.test(rawValue)) return; // allow only numbers
+                                                                field.onChange(rawValue ? Number(rawValue) : undefined); // ✅ undefined if empty
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+
+
+                                        {/* Pending Payment */}
+                                        <FormField
+                                            control={form.control}
+                                            name="pending_amount"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Pending Payment</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="Enter pending payment amount"
+                                                            value={field.value ? field.value.toLocaleString("en-IN") : ""}
+                                                            onChange={(e) => {
+                                                                const rawValue = e.target.value.replace(/,/g, ""); // remove commas
+                                                                if (!/^\d*$/.test(rawValue)) return; // allow only numbers
+                                                                field.onChange(rawValue ? Number(rawValue) : undefined); // ✅ undefined if empty
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+
+                                        {/* Recived Payment */}
+                                        <FormField
+                                            control={form.control}
+                                            name="payment_received_amount"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Recived Payment</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="Enter recived payment amount"
+                                                            value={field.value ? field.value.toLocaleString("en-IN") : ""}
+                                                            onChange={(e) => {
+                                                                const rawValue = e.target.value.replace(/,/g, ""); // remove commas
+                                                                if (!/^\d*$/.test(rawValue)) return; // allow only numbers
+                                                                field.onChange(rawValue ? Number(rawValue) : undefined); // ✅ undefined if empty
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+
+
+                                        {/* Payment Received Date */}
+                                        <FormField
+                                            control={form.control}
+                                            name="payment_received_date"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Payment Received Date</FormLabel>
+                                                    <DatePicker field={field} label="Payment Received Date" disabled={true} />
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+
+                                        {/* Payment Status */}
+                                        <div className="md:col-span-2">
+                                            <FormField
+                                                control={form.control}
+                                                name="status_of_payment"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Payment Status</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Current Project Status" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent className="dark:bg-[#181c24]">
+                                                                <SelectItem value="Pending" className="hover:dark:bg-[#20242c]">Pending</SelectItem>
+                                                                <SelectItem value="Unpaid" className="hover:dark:bg-[#20242c]">Unpaid</SelectItem>
+                                                                <SelectItem value="Paid" className="hover:dark:bg-[#20242c]">Paid</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+
+
                                         {/* About Client */}
                                         <div className="md:col-span-2">
                                             <FormField
@@ -722,6 +868,50 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
 
 
                                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+                                        {/* Name */}
+                                        <FormField
+                                            control={form.control}
+                                            name="project_name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Project Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter project name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+
+
+                                        {/* Project Status */}
+                                        <FormField
+                                            control={form.control}
+                                            name="project_status"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Project Status</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger className="w-full">
+                                                                <SelectValue placeholder="Select Current Project Status" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent className="dark:bg-[#181c24]">
+                                                            <SelectItem value="Delivered" className="hover:dark:bg-[#20242c]">Delivered</SelectItem>
+                                                            <SelectItem value="Completed" className="hover:dark:bg-[#20242c]">Completed</SelectItem>
+                                                            <SelectItem value="In Development" className="hover:dark:bg-[#20242c]">In Development</SelectItem>
+                                                            <SelectItem value="On Hold" className="hover:dark:bg-[#20242c]">On Hold</SelectItem>
+                                                            <SelectItem value="Cancelled" className="hover:dark:bg-[#20242c]">Cancelled</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
 
 
@@ -813,47 +1003,21 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
 
 
 
-                                        {/* Project Status */}
-                                        <FormField
-                                            control={form.control}
-                                            name="project_status"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Project Status</FormLabel>
-                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                        <FormControl>
-                                                            <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder="Select Current Project Status" />
-                                                            </SelectTrigger>
-                                                        </FormControl>
-                                                        <SelectContent className="dark:bg-[#181c24]">
-                                                            <SelectItem value="Delivered" className="hover:dark:bg-[#20242c]">Delivered</SelectItem>
-                                                            <SelectItem value="Completed" className="hover:dark:bg-[#20242c]">Completed</SelectItem>
-                                                            <SelectItem value="In Development" className="hover:dark:bg-[#20242c]">In Development</SelectItem>
-                                                            <SelectItem value="On Hold" className="hover:dark:bg-[#20242c]">On Hold</SelectItem>
-                                                            <SelectItem value="Cancelled" className="hover:dark:bg-[#20242c]">Cancelled</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-
-
 
                                         {/* Work Completed Date */}
-                                        <FormField
-                                            control={form.control}
-                                            name="work_completed_date"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Work Completed Date (Optional)</FormLabel>
-                                                    <DatePicker field={field} label="Work Completed Date" disabled={false} />
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                                        <div className="md:col-span-2">
+                                            <FormField
+                                                control={form.control}
+                                                name="work_completed_date"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Work Completed Date (Optional)</FormLabel>
+                                                        <DatePicker field={field} label="Work Completed Date" disabled={false} />
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
 
 
 
@@ -1033,6 +1197,56 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
                                             />
 
 
+
+                                            {/* Domain Cost */}
+                                            <FormField
+                                                control={form.control}
+                                                name="domain_cost"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Domain Cost</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter Domain Cost"
+                                                                value={field.value ? field.value.toLocaleString("en-IN") : ""}
+                                                                onChange={(e) => {
+                                                                    const rawValue = e.target.value.replace(/,/g, ""); // remove commas
+                                                                    if (!/^\d*$/.test(rawValue)) return; // allow only numbers
+                                                                    field.onChange(rawValue ? Number(rawValue) : undefined); // ✅ undefined if empty
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+
+                                            {/* Payment Status */}
+                                            <FormField
+                                                control={form.control}
+                                                name="domain_cost_status"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Payment Status</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Current Project Status" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent className="dark:bg-[#181c24]">
+                                                                <SelectItem value="Pending" className="hover:dark:bg-[#20242c]">Pending</SelectItem>
+                                                                <SelectItem value="Unpaid" className="hover:dark:bg-[#20242c]">Unpaid</SelectItem>
+                                                                <SelectItem value="Paid" className="hover:dark:bg-[#20242c]">Paid</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+
                                         </CardContent>
 
 
@@ -1176,6 +1390,55 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
                                             />
 
 
+                                            {/* Domain Cost */}
+                                            <FormField
+                                                control={form.control}
+                                                name="server_cost"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Domain Cost</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="Enter Domain Cost"
+                                                                value={field.value ? field.value.toLocaleString("en-IN") : ""}
+                                                                onChange={(e) => {
+                                                                    const rawValue = e.target.value.replace(/,/g, ""); // remove commas
+                                                                    if (!/^\d*$/.test(rawValue)) return; // allow only numbers
+                                                                    field.onChange(rawValue ? Number(rawValue) : undefined); // ✅ undefined if empty
+                                                                }}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+
+                                            {/* Payment Status */}
+                                            <FormField
+                                                control={form.control}
+                                                name="server_cost_status"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Payment Status</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger className="w-full">
+                                                                    <SelectValue placeholder="Select Current Project Status" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent className="dark:bg-[#181c24]">
+                                                                <SelectItem value="Pending" className="hover:dark:bg-[#20242c]">Pending</SelectItem>
+                                                                <SelectItem value="Unpaid" className="hover:dark:bg-[#20242c]">Unpaid</SelectItem>
+                                                                <SelectItem value="Paid" className="hover:dark:bg-[#20242c]">Paid</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+
                                         </CardContent>
 
 
@@ -1293,24 +1556,6 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
                                         />
 
 
-
-                                        {/* payment gateway url */}
-                                        <FormField
-                                            control={form.control}
-                                            name="payment_gateway_url"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Payment Gateway Url</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Payment Gateway Url" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-
-
                                         {/* payment gateway username */}
                                         <FormField
                                             control={form.control}
@@ -1365,16 +1610,33 @@ export function AddProjectModal({ isOpen, onClose }: AddProjectModalProps) {
 
 
 
+                                        {/* payment gateway url */}
+                                        <div className="md:col-span-2">
+                                            <FormField
+                                                control={form.control}
+                                                name="payment_gateway_url"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Payment Gateway Url</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="Payment Gateway Url" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+
+
                                     </CardContent>
 
 
                                 </Card>
 
+
                             </motion.div>
 
                         )}
-
-
 
 
 
